@@ -2,6 +2,7 @@ node_modules
 dist
 dev.log
 dev.err
+auth.log
 *.local
 .DS_Store
 Thumbs.db
