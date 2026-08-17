@@ -1,4 +1,5 @@
 import { getStats } from './stats'
+import { ALL_BUTTONS } from './metrics'
 import type { StatsState } from './stats'
 
 export interface ReportPayload {
@@ -10,12 +11,16 @@ export interface ReportPayload {
 
 function buildPayload(s: StatsState): ReportPayload {
   const counts: Record<string, number> = {}
+  for (const key of ALL_BUTTONS) counts[key] = 0
+
   let total = 0
   for (const [key, count] of Object.entries(s.counts)) {
     const idx = key.indexOf(' :: ')
     const label = idx >= 0 ? key.slice(idx + 4) : key
-    counts[label] = (counts[label] ?? 0) + count
-    total += count
+    if (label in counts) {
+      counts[label] += count
+      total += count
+    }
   }
 
   const now = new Date()

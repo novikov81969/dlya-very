@@ -127,7 +127,7 @@ function refreshStats(ss) {
     values.forEach((r) => {
       acc += +r[i] || 0
     })
-    if (acc > 0) sums.push([h, acc])
+    sums.push([h, acc])
   })
   sums.sort((a, b) => b[1] - a[1])
 
@@ -192,6 +192,11 @@ function refreshStats(ss) {
     stats.getRange(r, 2).setValue(sItem[1]).setNumberFormat('0').setFontWeight('bold').setHorizontalAlignment('center').setBackground(bg)
     stats.getRange(r, 3).setValue(+(totalClicks ? (sItem[1] / totalClicks) * 100 : 0).toFixed(1)).setNumberFormat('0.0"%"').setHorizontalAlignment('center').setBackground(bg)
     stats.setRowHeight(r, 24)
+    if (sItem[1] === 0) {
+      stats.getRange(r, 1, 1, 3).setFontColor('#B5A8C8').setFontStyle('italic')
+      stats.getRange(r, 2).setFontWeight('normal').setFontColor('#C9BED9')
+      stats.getRange(r, 3).setFontWeight('normal').setFontColor('#C9BED9')
+    }
   })
 
   stats.setColumnWidth(1, 250)
