@@ -103,12 +103,13 @@ function renderPages(ss, buttons, accMap) {
   })
 
   scenes.forEach((scene) => {
-    const list = byScene[scene]
+const list = byScene[scene]
     const sheet = getSheet(ss, scene)
     sheet.clear()
-    if (sheet.getFilter()) sheet.getFilter().remove()
+    var f = sheet.getFilter(); if (f) f.remove()
 
     const totalCols = PAGE_PER_ROW * (TILE_W + TILE_GAP) - TILE_GAP
+    ensureGrid(sheet, totalCols)
 
     sheet.getRange(1, 1, 1, totalCols).merge()
     sheet.getRange(1, 1)
@@ -178,9 +179,15 @@ function getSheet(ss, name) {
   return s || ss.insertSheet(name)
 }
 
+function ensureGrid(sheet, minCols) {
+  const m = sheet.getMaxColumns()
+  if (m < minCols) sheet.insertColumnsAfter(m, minCols - m)
+}
+
 function ensureHeaders(sheet, keys) {
   if (sheet.getLastRow() === 0) {
     const headers = BASE.concat(keys.filter((k) => BASE.indexOf(k) === -1))
+    ensureGrid(sheet, headers.length)
     sheet.appendRow(headers)
     return headers
   }
@@ -189,6 +196,7 @@ function ensureHeaders(sheet, keys) {
   const missing = keys.filter((k) => headers.indexOf(k) === -1)
   if (missing.length) {
     headers = headers.concat(missing)
+    ensureGrid(sheet, headers.length)
     sheet.getRange(1, 1, 1, headers.length).setValues([headers])
   }
   return headers
