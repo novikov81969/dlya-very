@@ -85,6 +85,7 @@ export function LetterScene({ onNext }: SceneProps) {
             />
             <motion.span
               className="env-seal"
+              style={{ x: '-50%', y: '-50%' }}
               animate={{ opacity: phase === 'opening' ? 0 : 1, scale: phase === 'opening' ? 1.6 : 1 }}
               transition={{ duration: 0.5 }}
             >

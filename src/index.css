@@ -628,7 +628,6 @@ button {
   left: 50%;
   width: 58px;
   height: 58px;
-  transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #e089af, var(--magenta) 60%, #a01f51 100%);
   display: grid;
