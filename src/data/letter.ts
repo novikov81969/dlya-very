@@ -8,7 +8,7 @@ export const letterBody = 'Вера, у меня есть к тебе предл
 
 export const letterAsk = 'Пойдём со мной на свидание?'
 
-export const letterSub = 'Но на этот раз я снова хочу сделать всё красиво.'
+export const letterSub = 'И я снова хочу сделать всё красиво.'
 
 export const yesButtons = ['Да ❤️', 'Конечно, да ❤️']
 

@@ -184,6 +184,7 @@ button {
   border: 1px solid var(--stroke);
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(1.25);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.25);
   box-shadow: 0 18px 50px rgba(8, 4, 14, 0.55);
 }
 
@@ -266,6 +267,7 @@ button {
   border: 1px solid var(--stroke);
   color: var(--text);
   backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
 }
 
 .btn-ghost:hover {
@@ -280,11 +282,26 @@ button {
 }
 
 .btn-escape {
+  position: fixed;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 48px;
-  padding: 0 18px;
+  padding: 0 22px;
+  border-radius: 999px;
   font-size: 15px;
-  color: var(--muted);
-  position: absolute;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(34, 18, 44, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 34px rgba(8, 4, 14, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transform: translate(-50%, -50%);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .row {
@@ -528,6 +545,11 @@ button {
   animation: floaty 6s ease-in-out infinite;
 }
 
+.heart-jiggle {
+  display: block;
+  line-height: 0;
+}
+
 @keyframes floaty {
   0%,
   100% {
@@ -547,19 +569,43 @@ button {
 /* ===== envelope ===== */
 .envelope {
   position: relative;
-  width: min(78vw, 340px);
-  height: 210px;
+  width: min(80vw, 350px);
+  height: 215px;
   cursor: pointer;
+  perspective: 900px;
 }
 
-.env-front {
+.env-body {
   position: absolute;
   inset: 0;
-  border-radius: 18px;
-  background: linear-gradient(165deg, #f7ecdd 0%, #e9d6c3 100%);
-  box-shadow: 0 22px 60px rgba(8, 4, 14, 0.6);
-  display: grid;
-  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(170deg, #fbf1e0 0%, #f0ddc6 45%, #dfc6a8 100%);
+  border: 1px solid rgba(190, 145, 105, 0.4);
+  box-shadow:
+    0 26px 60px rgba(8, 4, 14, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65),
+    inset 2px 0 0 rgba(255, 255, 255, 0.35),
+    inset -2px 0 0 rgba(255, 255, 255, 0.35);
+}
+
+.env-side {
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 56%;
+  filter: drop-shadow(0 2px 2px rgba(90, 55, 25, 0.15));
+}
+
+.env-left {
+  left: 0;
+  background: linear-gradient(115deg, #f6e7d0 0%, #e7cdaa 100%);
+  clip-path: polygon(0 100%, 100% 0, 0 0);
+}
+
+.env-right {
+  right: 0;
+  background: linear-gradient(245deg, #f6e7d0 0%, #dfc3a0 100%);
+  clip-path: polygon(100% 100%, 0 0, 100% 0);
 }
 
 .env-flap {
@@ -567,25 +613,32 @@ button {
   top: 0;
   left: 0;
   right: 0;
-  height: 55%;
-  background: linear-gradient(180deg, #fdf6ea 0%, #ecdcc8 100%);
+  height: 56%;
+  background: linear-gradient(180deg, #fff9ef 0%, #f2e0c6 88%);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  border-radius: 18px 18px 0 0;
   transform-origin: top center;
   z-index: 2;
+  border-radius: 16px 16px 0 0;
 }
 
 .env-seal {
-  width: 54px;
-  height: 54px;
+  position: absolute;
+  z-index: 3;
+  top: 44%;
+  left: 50%;
+  width: 58px;
+  height: 58px;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #e089af, var(--magenta) 60%, #a01f51 100%);
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 20px rgba(160, 31, 81, 0.5);
-  z-index: 3;
-  font-size: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  font-size: 19px;
+  box-shadow:
+    0 8px 22px rgba(160, 31, 81, 0.55),
+    inset 0 2px 3px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.4);
 }
 
 .letter-card {
@@ -646,10 +699,12 @@ button {
   background: rgba(20, 10, 26, 0.82);
   border: 1px solid var(--stroke);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   font-size: 14.5px;
   color: var(--text);
   box-shadow: 0 14px 40px rgba(8, 4, 14, 0.6);
   text-align: center;
+  max-width: calc(100vw - 32px);
 }
 
 /* ===== music button ===== */
@@ -664,6 +719,7 @@ button {
   background: rgba(20, 10, 26, 0.6);
   border: 1px solid var(--stroke);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   font-size: 19px;
   display: grid;
   place-items: center;
@@ -687,6 +743,48 @@ button {
 .fade-out {
   opacity: 0;
   transition: opacity 0.5s ease;
+}
+
+/* ===== phone tuning (iPhone: 430px, small phones: 360px) ===== */
+@media (max-width: 520px) {
+  .stage {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .letter-card {
+    padding: 26px 18px;
+  }
+
+  .envelope {
+    height: 195px;
+  }
+
+  .cinema-card {
+    min-height: 130px;
+  }
+
+  .desk-tile {
+    min-height: 82px;
+  }
+
+  .item-chip {
+    min-height: 100px;
+    padding: 14px 8px;
+  }
+
+  .btn {
+    min-height: 52px;
+  }
+
+  .big-ask {
+    font-size: clamp(28px, 7.5vw, 40px);
+  }
+
+  .heart-svg {
+    width: 132px;
+    height: 120px;
+  }
 }
 
 @media (min-width: 640px) {

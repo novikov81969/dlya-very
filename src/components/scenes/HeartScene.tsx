@@ -59,15 +59,14 @@ const tapHeart = () => {
         ))}
       </div>
 
-      <motion.button
+<motion.button
         type="button"
         className="heart-wrap"
         onClick={tapHeart}
         disabled={!mainDone}
         aria-label={mainDone ? 'Сердце' : undefined}
-        animate={
-          wiggle ? { rotate: [0, -8, 8, -6, 6, 0], scale: 1.06 } : hintIdx !== null && taps > 0 ? { scale: [1, 1.14, 1] } : {}
-        }
+        animate={wiggle ? { rotate: [0, -8, 8, -6, 6, 0], scale: 1.06 } : {}}
+        whileTap={{ scale: 0.94 }}
         transition={{ duration: wiggle ? 0.7 : 0.45 }}
         style={{
           background: 'none',
@@ -80,23 +79,31 @@ const tapHeart = () => {
         }}
       >
         <span className="heart-glow" />
-        <svg className="heart-svg" width="150" height="136" viewBox="0 0 32 30" aria-hidden>
-          <defs>
-            <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ff9ec7" />
-              <stop offset="55%" stopColor="#d4527a" />
-              <stop offset="100%" stopColor="#8b3a5e" />
-            </linearGradient>
-          </defs>
-          <path d={HEART_SVG} fill="url(#hg)" />
-          <path
-            d={HEART_SVG}
-            fill="none"
-            stroke="rgba(255,255,255,0.55)"
-            strokeWidth="0.7"
-            opacity="0.55"
-          />
-        </svg>
+        <motion.span
+          key={`heart-tap-${taps}`}
+          className="heart-jiggle"
+          initial={taps > 0 ? { rotate: -10, scale: 1.14 } : { rotate: 0, scale: 1 }}
+          animate={{ rotate: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 12 }}
+        >
+          <svg className="heart-svg" width="150" height="136" viewBox="0 0 32 30" aria-hidden>
+            <defs>
+              <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ff9ec7" />
+                <stop offset="55%" stopColor="#d4527a" />
+                <stop offset="100%" stopColor="#8b3a5e" />
+              </linearGradient>
+            </defs>
+            <path d={HEART_SVG} fill="url(#hg)" />
+            <path
+              d={HEART_SVG}
+              fill="none"
+              stroke="rgba(255,255,255,0.55)"
+              strokeWidth="0.7"
+              opacity="0.55"
+            />
+          </svg>
+        </motion.span>
       </motion.button>
 
       <p className="heart-tap-hint">

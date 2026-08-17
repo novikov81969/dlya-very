@@ -15,14 +15,14 @@ import type { SceneProps } from '../../types'
 type Phase = 'setup' | 'envelope' | 'opening' | 'ask'
 
 interface EscPos {
-  x: number
-  y: number
+  left: number
+  top: number
 }
 
 export function LetterScene({ onNext }: SceneProps) {
   const [phase, setPhase] = useState<Phase>('setup')
   const [askStep, setAskStep] = useState(0)
-  const [escPos, setEscPos] = useState<EscPos>({ x: 14, y: 40 })
+  const [escPos, setEscPos] = useState<EscPos>({ left: 78, top: 50 })
   const [escAttempts, setEscAttempts] = useState(0)
   const [escLine, setEscLine] = useState<string | null>(null)
   const [escGone, setEscGone] = useState(false)
@@ -51,7 +51,10 @@ export function LetterScene({ onNext }: SceneProps) {
       setEscLine('Молчу. Я не мешаю. Выбирай спокойно :)')
       return
     }
-    setEscPos({ x: 6 + Math.random() * 78, y: 30 + Math.random() * 45 })
+    setEscPos({
+      left: 48 + Math.round(Math.random() * 38),
+      top: 42 + Math.round(Math.random() * 30),
+    })
     setEscLine(noEscapeLines[(attempts - 1) % noEscapeLines.length])
   }
 
@@ -61,7 +64,7 @@ export function LetterScene({ onNext }: SceneProps) {
         <RevealLines lines={letterSetup} gap={1300} startAfter={700} lineClassName="line" onDone={() => setPhase('envelope')} />
       )}
 
-      <AnimatePresence mode="wait">
+<AnimatePresence mode="wait">
         {(phase === 'envelope' || phase === 'opening') && (
           <motion.div
             key="envelope"
@@ -72,7 +75,9 @@ export function LetterScene({ onNext }: SceneProps) {
             exit={{ opacity: 0, y: -30, scale: 0.9 }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
-            <span className="env-front" />
+            <span className="env-body" />
+            <span className="env-side env-left" />
+            <span className="env-side env-right" />
             <motion.span
               className="env-flap"
               animate={{ rotateX: phase === 'opening' ? 180 : 0 }}
@@ -80,25 +85,26 @@ export function LetterScene({ onNext }: SceneProps) {
             />
             <motion.span
               className="env-seal"
-              animate={{ opacity: phase === 'opening' ? 0 : 1, scale: phase === 'opening' ? 1.4 : 1 }}
-              transition={{ duration: 0.45 }}
+              animate={{ opacity: phase === 'opening' ? 0 : 1, scale: phase === 'opening' ? 1.6 : 1 }}
+              transition={{ duration: 0.5 }}
             >
               ❤️
             </motion.span>
-            {phase === 'envelope' && (
-              <motion.span
-                className="heart-tap-hint"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                style={{ position: 'absolute', bottom: -34, left: 0, right: 0, textAlign: 'center' }}
-              >
-                нажми на конверт
-              </motion.span>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {phase === 'envelope' && (
+        <motion.p
+          key="env-hint"
+          className="heart-tap-hint"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          нажми на конверт
+        </motion.p>
+      )}
 
       <AnimatePresence>
         {phase === 'ask' && (
@@ -123,11 +129,11 @@ export function LetterScene({ onNext }: SceneProps) {
               </motion.p>
             )}
 
-            <AnimatePresence>
+<AnimatePresence>
               {askStep >= 2 && (
                 <motion.div
                   className="row"
-                  style={{ position: 'relative', marginTop: 22 }}
+                  style={{ marginTop: 22 }}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
@@ -145,26 +151,28 @@ export function LetterScene({ onNext }: SceneProps) {
                       {label}
                     </motion.button>
                   ))}
-
-                  {!escGone && (
-                    <motion.button
-                      type="button"
-                      className="btn btn-escape"
-                      style={{ left: `${escPos.x}%`, top: `${escPos.y}%` }}
-                      animate={{ left: `${escPos.x}%`, top: `${escPos.y}%` }}
-                      transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-                      whileHover={{ scale: 0.9 }}
-                      whileTap={{ scale: 0.9 }}
-                      onMouseEnter={dodgeNo}
-                      onClick={dodgeNo}
-                    >
-                      {noButtonStart}
-                    </motion.button>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {askStep >= 2 && !escGone && (
+          <motion.button
+            key="esc-btn"
+            type="button"
+            className="btn-escape"
+            initial={{ opacity: 0, left: `${escPos.left}%`, top: `${escPos.top}%` }}
+            animate={{ opacity: 1, left: `${escPos.left}%`, top: `${escPos.top}%` }}
+            exit={{ opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+            onMouseEnter={dodgeNo}
+            onClick={dodgeNo}
+          >
+            {noButtonStart}
+          </motion.button>
         )}
       </AnimatePresence>
 

@@ -24,8 +24,16 @@ const IDLE_LINES: Record<SceneId, string> = {
   finale: 'Я всё ещё тут. И, кажется, никуда не денусь.',
 }
 
+const SCENE_IDS: SceneId[] = ['intro', 'memory', 'coffee', 'cinema', 'heart', 'letter', 'finale']
+
+function initialSceneFromHash(): SceneId {
+  const m = window.location.hash.match(/scene=([\w-]+)/)
+  const hit = m && (SCENE_IDS as string[]).includes(m[1])
+  return hit ? (m![1] as SceneId) : 'intro'
+}
+
 export default function App() {
-  const [scene, setScene] = useState<SceneId>('intro')
+  const [scene, setScene] = useState<SceneId>(initialSceneFromHash)
   const [run, setRun] = useState(0)
   const [musicStarted, setMusicStarted] = useState(false)
   const [musicPlaying, setMusicPlaying] = useState(false)
