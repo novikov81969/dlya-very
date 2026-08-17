@@ -11,6 +11,7 @@ import {
 } from '../../data/letter'
 import { RevealLines } from '../RevealLines'
 import { bump, setChoice } from '../../stats'
+import { sendReport } from '../../report'
 import type { SceneProps } from '../../types'
 
 type Phase = 'setup' | 'envelope' | 'opening' | 'ask'
@@ -153,6 +154,7 @@ export function LetterScene({ onNext }: SceneProps) {
                       onClick={() => {
                         bump('Выбор', label)
                         setChoice(label)
+                        sendReport()
                         onNext('finale')
                       }}
                       animate={{ scale: 1 }}
