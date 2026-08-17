@@ -10,6 +10,11 @@ const BAND_2 = '#FFFFFF'
 const TITLE_BG = '#3E1F39'
 const NUM = 6
 
+const PAGE_PER_ROW = 4
+const TILE_H = 4
+const TILE_W = 9
+const TILE_GAP = 1
+
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents)
@@ -27,6 +32,10 @@ function doPost(e) {
     data.appendRow(row)
     styleData(data)
     refreshStats(ss)
+    if (Array.isArray(body.buttons) && body.buttons.length) {
+      const accMap = buildAccMap(headers, data)
+      renderPages(ss, body.buttons, accMap)
+    }
     logRow(ss, 'post ok', body.ts)
     return ContentService.createTextOutput('ok')
   } catch (err) {
@@ -65,6 +74,94 @@ function doGet(e) {
   } catch (err) {
     return ContentService.createTextOutput('doGet error: ' + err.message)
   }
+}
+
+function buildAccMap(headers, data) {
+  const lr = data.getLastRow()
+  const values = data.getRange(2, 1, Math.max(lr - 1, 1), data.getLastColumn()).getValues()
+  const accMap = {}
+  headers.forEach((h, i) => {
+    if (BASE.indexOf(h) >= 0) return
+    let acc = 0
+    values.forEach((r) => {
+      acc += +r[i] || 0
+    })
+    accMap[h] = acc
+  })
+  return accMap
+}
+
+function renderPages(ss, buttons, accMap) {
+  const scenes = []
+  const byScene = {}
+  buttons.forEach((b) => {
+    if (!byScene[b.scene]) {
+      byScene[b.scene] = []
+      scenes.push(b.scene)
+    }
+    byScene[b.scene].push(b)
+  })
+
+  scenes.forEach((scene) => {
+    const list = byScene[scene]
+    const sheet = getSheet(ss, scene)
+    sheet.clear()
+    sheet.getFilter && sheet.getFilter() && sheet.getFilter().remove()
+
+    const totalCols = PAGE_PER_ROW * (TILE_W + TILE_GAP) - TILE_GAP
+
+    sheet.getRange(1, 1, 1, totalCols).merge()
+    sheet.getRange(1, 1)
+      .setValue('СТРАНИЦА «' + scene + '»')
+      .setBackground(HEADER_BG)
+      .setFontColor(HEADER_TXT)
+      .setFontSize(15)
+      .setFontWeight('bold')
+      .setHorizontalAlignment('center')
+      .setVerticalAlignment('middle')
+      .setFontFamily('Georgia')
+    sheet.setRowHeight(1, 34)
+
+    sheet.getRange(2, 1, 1, totalCols).merge()
+    sheet.getRange(2, 1)
+      .setValue('количество нажатий за все прохождения')
+      .setFontSize(10)
+      .setFontColor('#6B5B88')
+      .setHorizontalAlignment('center')
+    sheet.setRowHeight(2, 18)
+
+    list.forEach((b, k) => {
+      const gr = Math.floor(k / PAGE_PER_ROW)
+      const gc = k % PAGE_PER_ROW
+      const rowStart = 4 + gr * TILE_H
+      const colStart = 1 + gc * (TILE_W + TILE_GAP)
+      const acc = accMap[b.label] || 0
+
+      const range = sheet.getRange(rowStart, colStart, TILE_H, TILE_W)
+      range.merge()
+      range
+        .setValue(b.icon + ' ' + b.label + '\n× ' + acc)
+        .setWrap(true)
+        .setHorizontalAlignment('center')
+        .setVerticalAlignment('middle')
+        .setFontSize(11)
+
+      if (acc > 0) {
+        range.setBackground('#FFF0F7').setFontColor('#3E1F39').setFontWeight('bold')
+        range.setBorder(true, true, true, true, false, false, '#D8BFD6', SpreadsheetApp.BorderStyle.SOLID)
+      } else {
+        range.setBackground('#F5F1F7').setFontColor('#B5A8C8').setFontStyle('italic')
+        range.setBorder(true, true, true, true, false, false, '#E5DEF2', SpreadsheetApp.BorderStyle.SOLID)
+      }
+
+      for (let r = rowStart; r < rowStart + TILE_H; r++) sheet.setRowHeight(r, 20)
+    })
+
+    for (let c = 1; c <= totalCols; c++) {
+      const isTile = c % (TILE_W + TILE_GAP) !== 0
+      sheet.setColumnWidth(c, isTile ? 11 : 2)
+    }
+  })
 }
 
 function logRow(ss, msg, extra) {

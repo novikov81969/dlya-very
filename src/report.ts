@@ -1,12 +1,14 @@
 import { getStats } from './stats'
-import { ALL_BUTTONS } from './metrics'
+import { ALL_BUTTONS, CATALOG } from './metrics'
 import type { StatsState } from './stats'
+import type { ButtonSpec } from './metrics'
 
 export interface ReportPayload {
   ts: string
   total: number
   choice: string | null
   counts: Record<string, number>
+  buttons: ButtonSpec[]
 }
 
 function buildPayload(s: StatsState): ReportPayload {
@@ -26,7 +28,7 @@ function buildPayload(s: StatsState): ReportPayload {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
   const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
-  return { ts, total, choice: s.choice, counts }
+  return { ts, total, choice: s.choice, counts, buttons: CATALOG }
 }
 
 export function sendReport(): void {
