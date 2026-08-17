@@ -1,6 +1,7 @@
 const BASE = ['Время', 'Всего кликов', 'Выбор']
 const DATA = 'Данные'
 const STATS = 'Итоги'
+const LOG = 'Журнал'
 
 const HEADER_BG = '#5B2A52'
 const HEADER_TXT = '#FFFFFF'
@@ -10,26 +11,69 @@ const TITLE_BG = '#3E1F39'
 const NUM = 6
 
 function doPost(e) {
-  const body = JSON.parse(e.postData.contents)
-  const ss = SpreadsheetApp.getActiveSpreadsheet()
-  const data = getSheet(ss, DATA)
-  const headers = ensureHeaders(data, Object.keys(body.counts || {}))
+  try {
+    const body = JSON.parse(e.postData.contents)
+    const ss = SpreadsheetApp.getActiveSpreadsheet()
+    const data = getSheet(ss, DATA)
+    const headers = ensureHeaders(data, Object.keys(body.counts || {}))
 
-  const row = headers.map((h) => {
-    if (h === 'Время') return body.ts
-    if (h === 'Всего кликов') return body.total
-    if (h === 'Выбор') return body.choice || ''
-    return (body.counts && body.counts[h]) || 0
-  })
+    const row = headers.map((h) => {
+      if (h === 'Время') return body.ts
+      if (h === 'Всего кликов') return body.total
+      if (h === 'Выбор') return body.choice || ''
+      return (body.counts && body.counts[h]) || 0
+    })
 
-  data.appendRow(row)
-  styleData(data)
-  refreshStats(ss)
-  return ContentService.createTextOutput('ok')
+    data.appendRow(row)
+    styleData(data)
+    refreshStats(ss)
+    logRow(ss, 'post ok', body.ts)
+    return ContentService.createTextOutput('ok')
+  } catch (err) {
+    logRow(SpreadsheetApp.getActiveSpreadsheet(), 'error: ' + err.message, (e && e.postData && e.postData.contents) || '')
+    return ContentService.createTextOutput('error: ' + err.message)
+  }
 }
 
-function doGet() {
-  return ContentService.createTextOutput('app is up')
+function doGet(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet()
+    const sheets = ss.getSheets().map((s) => s.getName() + ':' + s.getLastRow() + 'r')
+    let latest = ''
+    const data = ss.getSheetByName(DATA)
+    if (data && data.getLastRow() > 1) {
+      latest = data.getRange(2, 1, Math.min(data.getLastRow() - 1, 3), 6).getValues()
+        .map((r) => r.join(' | '))
+        .join('\n')
+    }
+    const log = getSheet(ss, LOG)
+    const logRows = log.getLastRow()
+    const lastLog = logRows >= 1
+      ? log.getRange(1, 1, Math.min(logRows, 8), 2).getValues().map((r) => r.join(' | ')).join('\n')
+      : '(пусто)'
+    const out = [
+      'SPREADSHEET: ' + ss.getName(),
+      'URL: ' + ss.getUrl(),
+      'SHEETS: ' + sheets.join(', '),
+      'DANYE rows: ' + (data ? data.getLastRow() - 1 : -1),
+      '----- последние строки Данные -----',
+      latest || '(нет данных)',
+      '----- Журнал (последние) -----',
+      lastLog,
+    ].join('\n')
+    return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.TEXT)
+  } catch (err) {
+    return ContentService.createTextOutput('doGet error: ' + err.message)
+  }
+}
+
+function logRow(ss, msg, extra) {
+  try {
+    const log = getSheet(ss, LOG)
+    log.appendRow([new Date().toISOString(), String(msg), String(extra || '')])
+  } catch (err) {
+    /* ignore */
+  }
 }
 
 function getSheet(ss, name) {
@@ -133,7 +177,6 @@ function refreshStats(ss) {
 
   stats.setFrozenRows(1)
 
-  // title
   stats.getRange(1, 1, 1, NUM).merge()
   stats.getRange(1, 1)
     .setValue('ИТОГО ПО ВСЕМ ПРОХОЖДЕНИЯМ ❤️')
@@ -146,7 +189,6 @@ function refreshStats(ss) {
     .setFontFamily('Georgia')
   stats.setRowHeight(1, 36)
 
-  // meta rows
   const meta = [
     ['Всего прохождений', n],
     ['Всего кликов за всё время', totalClicks],
@@ -163,7 +205,6 @@ function refreshStats(ss) {
     stats.setRowHeight(r, 26)
   })
 
-  // buttons table title
   const br = 7
   stats.getRange(br, 1, 1, NUM).merge()
   stats.getRange(br, 1)
@@ -188,14 +229,15 @@ function refreshStats(ss) {
   sums.forEach((sItem, i) => {
     const r = hdr + 1 + i
     const bg = i % 2 === 0 ? BAND_1 : BAND_2
+    const isZero = sItem[1] === 0
     stats.getRange(r, 1).setValue(sItem[0]).setFontSize(12).setBackground(bg)
-    stats.getRange(r, 2).setValue(sItem[1]).setNumberFormat('0').setFontWeight('bold').setHorizontalAlignment('center').setBackground(bg)
+    stats.getRange(r, 2).setValue(sItem[1]).setNumberFormat('0').setFontWeight(isZero ? 'normal' : 'bold').setHorizontalAlignment('center').setBackground(bg)
     stats.getRange(r, 3).setValue(+(totalClicks ? (sItem[1] / totalClicks) * 100 : 0).toFixed(1)).setNumberFormat('0.0"%"').setHorizontalAlignment('center').setBackground(bg)
     stats.setRowHeight(r, 24)
-    if (sItem[1] === 0) {
+    if (isZero) {
       stats.getRange(r, 1, 1, 3).setFontColor('#B5A8C8').setFontStyle('italic')
-      stats.getRange(r, 2).setFontWeight('normal').setFontColor('#C9BED9')
-      stats.getRange(r, 3).setFontWeight('normal').setFontColor('#C9BED9')
+      stats.getRange(r, 2).setFontColor('#C9BED9')
+      stats.getRange(r, 3).setFontColor('#C9BED9')
     }
   })
 
