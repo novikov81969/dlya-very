@@ -1,28 +1,27 @@
-import { aggregate, getStats } from './stats'
+import { getStats } from './stats'
 import type { StatsState } from './stats'
-
-interface ReportRow {
-  scene: string
-  item: string
-  count: number
-}
 
 export interface ReportPayload {
   ts: string
   total: number
   choice: string | null
-  rows: ReportRow[]
+  counts: Record<string, number>
 }
 
 function buildPayload(s: StatsState): ReportPayload {
-  const { groups, total } = aggregate(s)
-  const rows: ReportRow[] = []
-  for (const g of groups) for (const it of g.items) rows.push({ scene: g.scene, item: it.label, count: it.count })
+  const counts: Record<string, number> = {}
+  let total = 0
+  for (const [key, count] of Object.entries(s.counts)) {
+    const idx = key.indexOf(' :: ')
+    const label = idx >= 0 ? key.slice(idx + 4) : key
+    counts[label] = (counts[label] ?? 0) + count
+    total += count
+  }
 
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
   const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
-  return { ts, total, choice: s.choice, rows }
+  return { ts, total, choice: s.choice, counts }
 }
 
 export function sendReport(): void {
