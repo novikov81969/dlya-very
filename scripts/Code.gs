@@ -106,7 +106,7 @@ function renderPages(ss, buttons, accMap) {
     const list = byScene[scene]
     const sheet = getSheet(ss, scene)
     sheet.clear()
-    sheet.getFilter && sheet.getFilter() && sheet.getFilter().remove()
+    if (sheet.getFilter()) sheet.getFilter().remove()
 
     const totalCols = PAGE_PER_ROW * (TILE_W + TILE_GAP) - TILE_GAP
 
