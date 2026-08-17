@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { cinemaCards, cinemaCorrect, cinemaKicker, cinemaTask, cinemaWrong } from '../../data/cinema'
 import { RevealLines } from '../RevealLines'
+import { bump } from '../../stats'
 import type { SceneProps } from '../../types'
 
 export function CinemaScene({ onNext }: SceneProps) {
@@ -15,8 +16,10 @@ const open = (card: (typeof cinemaCards)[number]) => {
     setOpened((o) => [...o, card.id])
 
     if (card.correct) {
+      bump('Кино', `✔ ${card.hidden}`)
       setDone(true)
     } else {
+      bump('Кино', `✗ ${card.hidden}`)
       setWrongNote(cinemaWrong[card.id] ?? 'не то')
     }
   }

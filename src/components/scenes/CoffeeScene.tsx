@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { coffeeFound, coffeeItems, coffeeTask } from '../../data/coffee'
 import { RevealLines } from '../RevealLines'
+import { bump } from '../../stats'
 import type { SceneProps } from '../../types'
 
 export function CoffeeScene({ onNext }: SceneProps) {
@@ -13,10 +14,12 @@ export function CoffeeScene({ onNext }: SceneProps) {
   const correctIds = coffeeItems.filter((i) => i.correct).map((i) => i.id)
   const completed = correctIds.every((id) => foundCorrect.includes(id))
 
-  const pick = (item: (typeof coffeeItems)[number]) => {
+const pick = (item: (typeof coffeeItems)[number]) => {
     if (item.correct) {
+      bump('Кофе и вафли', `${item.name} ✓`)
       setFoundCorrect((f) => (f.includes(item.id) ? f : [...f, item.id]))
     } else {
+      bump('Кофе и вафли', `${item.name} ✗`)
       setWrongMsg(item.wrongMsg ?? null)
       setShakingId(item.id)
     }

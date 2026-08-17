@@ -1,6 +1,7 @@
 ﻿import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { heartLines, heartTapHints } from '../../data/heart'
+import { bump } from '../../stats'
 import type { SceneProps } from '../../types'
 
 const HEART_SVG =
@@ -38,6 +39,7 @@ export function HeartScene({ onNext }: SceneProps) {
 
 const tapHeart = () => {
     if (!mainDone) return
+    bump('Сердце', 'нажатие на сердце')
     const idx = taps % heartTapHints.length
     setHintIdx(idx)
     setTaps((t) => t + 1)

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { hiddenNote, memoryDone, memoryHint, memoryItems, memoryKicker } from '../../data/memory'
 import { RevealLines } from '../RevealLines'
+import { bump } from '../../stats'
 import type { SceneProps } from '../../types'
 
 export function MemoryScene({ onNext }: SceneProps) {
@@ -13,8 +14,10 @@ export function MemoryScene({ onNext }: SceneProps) {
   const total = memoryItems.length
   const allFoundAny = found.length >= total
 
-  const pick = (id: string) => {
+const pick = (id: string) => {
     setSelected(id)
+    const item = memoryItems.find((i) => i.id === id)
+    if (item) bump('Память', item.label)
     if (!found.includes(id)) setFound((f) => [...f, id])
   }
 
@@ -51,11 +54,14 @@ export function MemoryScene({ onNext }: SceneProps) {
         ))}
       </div>
 
-      <motion.button
+<motion.button
         type="button"
         className="hidden-spark"
         whileTap={{ scale: 0.9 }}
-        onClick={() => setNoteFound(true)}
+        onClick={() => {
+          bump('Память', 'Скрытая записка ✨')
+          setNoteFound(true)
+        }}
         aria-label="Что-то ещё…"
         title="Что-то ещё…"
       >

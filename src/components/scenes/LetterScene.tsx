@@ -10,6 +10,7 @@ import {
   yesButtons,
 } from '../../data/letter'
 import { RevealLines } from '../RevealLines'
+import { bump, setChoice } from '../../stats'
 import type { SceneProps } from '../../types'
 
 type Phase = 'setup' | 'envelope' | 'opening' | 'ask'
@@ -29,6 +30,7 @@ export function LetterScene({ onNext }: SceneProps) {
 
   const openEnvelope = () => {
     if (phase !== 'envelope') return
+    bump('Конверт', 'открыт')
     setPhase('opening')
     window.setTimeout(() => setPhase('ask'), 1150)
   }
@@ -47,10 +49,12 @@ export function LetterScene({ onNext }: SceneProps) {
     const attempts = escAttempts + 1
     setEscAttempts(attempts)
     if (attempts > 4) {
+      bump('Конверт', '"нет" · попыток: 5+')
       setEscGone(true)
       setEscLine('Молчу. Я не мешаю. Выбирай спокойно :)')
       return
     }
+    bump('Конверт', '"нет" · попытка')
     setEscPos({
       left: 48 + Math.round(Math.random() * 38),
       top: 42 + Math.round(Math.random() * 30),
@@ -146,7 +150,11 @@ export function LetterScene({ onNext }: SceneProps) {
                       className={i === 0 ? 'btn btn-primary' : 'btn btn-primary-alt'}
                       whileHover={{ scale: 1.04 }}
                       whileTap={{ scale: 0.96 }}
-                      onClick={() => onNext('finale')}
+                      onClick={() => {
+                        bump('Выбор', label)
+                        setChoice(label)
+                        onNext('finale')
+                      }}
                       animate={{ scale: 1 }}
                     >
                       {label}

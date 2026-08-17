@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { RevealLines } from '../RevealLines'
 import { introButton, introHint, introLines } from '../../data/intro'
+import { bump } from '../../stats'
 import type { SceneProps } from '../../types'
 
 export function IntroScene({ onNext }: SceneProps) {
@@ -28,7 +29,14 @@ export function IntroScene({ onNext }: SceneProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            <button type="button" className="btn btn-primary" onClick={() => onNext('memory')}>
+<button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                bump('Начало', 'Начать')
+                onNext('memory')
+              }}
+            >
               {introButton}
             </button>
             <p className="hint" style={{ margin: '4px 0 0', width: '100%', fontSize: 13, color: 'var(--muted)' }}>
