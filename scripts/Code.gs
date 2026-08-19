@@ -46,6 +46,10 @@ function doPost(e) {
 
 function doGet(e) {
   try {
+    if (e && e.parameter && e.parameter.action === 'reset') {
+      resetWorkbook()
+      return ContentService.createTextOutput('stats cleared')
+    }
     const ss = SpreadsheetApp.getActiveSpreadsheet()
     const sheets = ss.getSheets().map((s) => s.getName() + ':' + s.getLastRow() + 'r')
     let latest = ''
@@ -76,6 +80,20 @@ function doGet(e) {
   }
 }
 
+function resetWorkbook() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet()
+  const names = ['Данные', 'Итоги', 'Журнал', 'Начало', 'Память', 'Кофе', 'Кино', 'Сердце', 'Конверт']
+  names.forEach((n) => {
+    const s = ss.getSheetByName(n)
+    if (s) s.clear()
+  })
+  refreshStats(ss)
+}
+
+function resetStats() {
+  resetWorkbook()
+}
+
 function buildAccMap(headers, data) {
   const lr = data.getLastRow()
   const values = data.getRange(2, 1, Math.max(lr - 1, 1), data.getLastColumn()).getValues()
@@ -103,7 +121,7 @@ function renderPages(ss, buttons, accMap) {
   })
 
   scenes.forEach((scene) => {
-const list = byScene[scene]
+    const list = byScene[scene]
     const sheet = getSheet(ss, scene)
     sheet.clear()
     var f = sheet.getFilter(); if (f) f.remove()
